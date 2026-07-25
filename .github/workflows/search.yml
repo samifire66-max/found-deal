@@ -1,0 +1,37 @@
+name: TisotVeOd
+
+on:
+  schedule:
+    # רץ כל 3 שעות. זמן ב-UTC.
+    - cron: "13 */3 * * *"
+  workflow_dispatch: {}
+
+jobs:
+  search:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install requirements
+        run: |
+          pip install -r requirements.txt
+
+      - name: Restore sent-deals cache
+        uses: actions/cache@v4
+        with:
+          path: sent_deals.json
+          key: sent-deals-${{ github.run_id }}
+          restore-keys: |
+            sent-deals-
+
+      - name: Run
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python main.py
