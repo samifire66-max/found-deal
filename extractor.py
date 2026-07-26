@@ -5,6 +5,12 @@ PRICE_REGEX = re.compile(
     re.IGNORECASE,
 )
 
+# מחיר בשקלים כתוב במילים ("1,890 ש"ח" / "1890 שח" / "1890 שקל")
+# ולא בסימן ₪ - מאוד נפוץ בפוסטים ישראליים
+ILS_TEXT_REGEX = re.compile(
+    r"(\d+(?:,\d{3})?)\s?ש[\"'׳״]?ח\b|(\d+(?:,\d{3})?)\s?שקל(?:ים)?",
+)
+
 DESTINATIONS = {
     "rome": "Rome",
     "milan": "Milan",
@@ -138,13 +144,18 @@ def extract_price(text):
 
     m = PRICE_REGEX.search(text)
 
-    if not m:
-        return None, None
+    if m:
+        if m.group(1):
+            return int(m.group(2).replace(",", "")), m.group(1)
+        return int(m.group(3).replace(",", "")), m.group(4)
 
-    if m.group(1):
-        return int(m.group(2).replace(",", "")), m.group(1)
+    m = ILS_TEXT_REGEX.search(text)
 
-    return int(m.group(3).replace(",", "")), m.group(4)
+    if m:
+        amount = m.group(1) or m.group(2)
+        return int(amount.replace(",", "")), "₪"
+
+    return None, None
 
 
 def extract_destination(text):

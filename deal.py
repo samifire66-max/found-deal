@@ -12,5 +12,8 @@ class Deal:
     currency: str = ""
     published: str = ""
 
+    # "flight" or "package" (flight+hotel) or "" if not yet classified
+    deal_type: str = ""
+
     # חדש
     summary: str = ""

@@ -1,28 +1,30 @@
 {
-  "version": "0.1",
-  "search": {
-    "departure_airports": [
-      "TLV",
-      "HFA"
+  "version": "0.2",
+
+  "flights": {
+    "max_price_usd": 300,
+    "telegram_channels": [
+      "secretflights"
     ],
+    "max_results": 10
+  },
+
+  "packages": {
+    "max_total_price_ils": 4000,
+    "max_exception_price_ils": 4200
+  },
+
+  "search": {
+    "departure_airports": ["TLV", "HFA"],
     "travelers": {
       "adults": 2,
-      "children": [
-        14,
-        12,
-        9
-      ]
+      "children": [14, 12, 9]
     },
     "trip_type": "weekend",
     "direct_flights_only": true,
     "destinations": "ANY",
-    "max_total_price": 4000,
-    "max_exception_price": 4200,
     "accommodation": {
-      "type": [
-        "hotel",
-        "apartment"
-      ],
+      "type": ["hotel", "apartment"],
       "min_stars": 3,
       "min_rating": 8.5,
       "location": "city_center"
@@ -33,10 +35,12 @@
       "never_both": true
     }
   },
+
   "notifications": {
     "telegram": true,
     "whatsapp": false
   },
+
   "schedule": {
     "every_hours": 3,
     "minute": 13

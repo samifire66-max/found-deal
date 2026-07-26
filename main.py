@@ -7,9 +7,14 @@ from dedup_store import load_sent, save_sent, filter_unsent, mark_sent
 
 def build_message(deal):
 
+    icon = "📦" if deal.deal_type == "package" else "✈️"
+
     lines = [
-        f"✈️ {deal.title}"
+        f"{icon} {deal.title}"
     ]
+
+    if deal.deal_type == "package":
+        lines.append("(דיל חבילה משוער - טיסה+לינה. בדוק ידנית דירוג/כוכבים/מיקום המלון)")
 
     if deal.destination:
         lines.append(f"📍 יעד: {deal.destination}")

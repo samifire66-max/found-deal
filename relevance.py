@@ -1,4 +1,4 @@
-from flight_detector import is_flight
+from package_detector import classify
 from settings import SEARCH
 
 EUROPE = {
@@ -26,6 +26,10 @@ EUROPE = {
     "Venice",
 }
 
+# המרה גסה מאוד דולר->שקל, לצורך השוואה בלבד כשדיל חבילה מתומחר
+# בדולרים ולא בשקלים (אין לנו מקור שער חליפין חי כרגע)
+USD_TO_ILS = 3.7
+
 
 def is_israel_departure_source(deal):
     """
@@ -39,17 +43,9 @@ def is_israel_departure_source(deal):
     return (deal.source or "").startswith("Telegram:")
 
 
-def score(deal):
-
-    title = (deal.title or "") + " " + (deal.summary or "")
-
-    if not is_flight(title):
-        return 0
+def _score_flight(deal, title_lower):
 
     score = 0
-
-    title_lower = title.lower()
-
     israel_departure = is_israel_departure_source(deal)
 
     if israel_departure:
@@ -66,7 +62,6 @@ def score(deal):
     if deal.destination in EUROPE:
         score += 10
 
-    # ניקוד לפי מחיר לעומת סף התקציב שהוגדר (settings.py -> MAX_PRICE_USD)
     if deal.price is not None:
         max_price = SEARCH.get("max_price_usd", 300)
 
@@ -99,6 +94,56 @@ def score(deal):
                 score -= 100
 
     return score
+
+
+def _score_package(deal):
+    """
+    ניקוד לדילי חבילה (טיסה+מלון). חשוב: אין לנו כרגע מקור נתונים
+    אמיתי שמאמת דירוג מלון/כוכבים/מיקום - זה best-effort, מבוסס רק
+    על מה שכתוב בטקסט הפוסט. ראו README לגבי המגבלה הזו.
+    """
+
+    if is_israel_departure_source(deal):
+        base_score = 70
+    else:
+        base_score = 40
+
+    if deal.price is None:
+        # אין מחיר בטקסט - עדיין נציג את הדיל (עדיף להתריע ולתת
+        # לך לבדוק ידנית, מאשר להחמיץ חבילה טובה), אך בניקוד נמוך יותר
+        return base_score - 10
+
+    price_ils = deal.price
+    if (deal.currency or "").strip() in ("$", "usd", "USD"):
+        price_ils = deal.price * USD_TO_ILS
+
+    max_price = SEARCH.get("max_price", 4000)
+    max_price_exception = SEARCH.get("max_price_exception", 4200)
+
+    if price_ils <= max_price:
+        return base_score + 30
+
+    if price_ils <= max_price_exception:
+        return base_score + 10
+
+    # מעל התקציב, כולל החריגה - לא רלוונטי
+    return 0
+
+
+def score(deal):
+
+    title = (deal.title or "") + " " + (deal.summary or "")
+    title_lower = title.lower()
+
+    deal_type = deal.deal_type or classify(title_lower)
+
+    if deal_type == "package":
+        return _score_package(deal)
+
+    if deal_type == "flight":
+        return _score_flight(deal, title_lower)
+
+    return 0
 
 
 def is_relevant(deal):

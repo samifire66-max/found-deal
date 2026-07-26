@@ -2,6 +2,7 @@ from deal import Deal
 
 from extractor import extract_price
 from extractor import extract_destination
+from package_detector import classify
 
 
 def normalize(data):
@@ -13,6 +14,7 @@ def normalize(data):
 
     price, currency = extract_price(text)
     destination = extract_destination(text)
+    deal_type = classify(text) or ""
 
     return Deal(
         title=title,
@@ -23,4 +25,5 @@ def normalize(data):
         currency=currency or "",
         published=data.get("published", ""),
         summary=summary,
+        deal_type=deal_type,
     )
