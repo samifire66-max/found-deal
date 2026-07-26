@@ -2,7 +2,7 @@
   "version": "0.2",
 
   "flights": {
-    "max_price_usd": 300,
+    "max_price_usd": 3000,
     "telegram_channels": [
       "secretflights"
     ],
@@ -10,8 +10,8 @@
   },
 
   "packages": {
-    "max_total_price_ils": 4000,
-    "max_exception_price_ils": 4200
+    "max_total_price_ils": 40000,
+    "max_exception_price_ils": 42000
   },
 
   "search": {
